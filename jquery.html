@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+  <h1>Personnes (<span id="nombre_personnes"></span>)</h1>
+  <input type="text" placeholder="Filtrer" id="filtre">
+  <p id="aucune_personne">Il n'y a personne :-(</p>
+  <ul id="personnes"></ul>
+  
+  <form id="formulaire">
+    <h1>Nouvelle personne</h1>
+    <input type="text" id="nom" placeholder="Entrez un nom"><button type="submit">Ajouter</button>
+  </form>
+
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/vue/1.0.21/vue.min.js"></script>
+  <script>
+  $(function() {
+    var ul_personnes = $('ul#personnes');
+    var input_nom = $('input#nom');
+    var formulaire = $('form#formulaire');
+    var span_nombre_personnes = $('span#nombre_personnes');
+    var p_aucune_personne = $('p#aucune_personne');
+    var input_filtre = $('input#filtre');
+  
+    var personnes = [ // Imaginons que ces données proviennent d'une requête AJAX
+      { nom: 'Amiral Ackbar', id: 56 },
+      { nom: 'Lando Calrissia', id: 42 },
+      { nom: 'Mace Windu', id: 10 },
+      { nom: 'Palpatine', id: 23 }
+    ];
+    
+    var personnes_a_afficher = [];
+  
+    function afficher_liste_personnes() {
+      filtrer_personnes();
+      
+      ul_personnes.empty();
+    
+      $.each(personnes_a_afficher, function(index, personne) {
+        ul_personnes.append('<li>'+personne.nom+' <button data-index="'+index+'">Supprimer</button></li>');
+      });
+      
+      span_nombre_personnes.text(personnes_a_afficher.length);
+      
+      if (personnes_a_afficher.length == 0) {
+        p_aucune_personne.show();
+      } else {
+        p_aucune_personne.hide();
+      }
+    }
+    
+    function filtrer_personnes() {
+      var text = input_filtre.val();
+      
+      if (text == '') {
+        personnes_a_afficher = personnes;
+      } else {
+        personnes_a_afficher = personnes.filter(function(personne) {
+          return personne.nom.indexOf(text) > -1;
+        });
+      }
+    }
+    
+    input_filtre.on('keyup', function() {
+      afficher_liste_personnes();
+    });
+    
+    ul_personnes.on('click', 'li > button', function() {
+      // Ici normalement : requête AJAX pour supprimer dans la BDD en utilisant personnes[$(this).data('index')].id
+      personnes.splice(parseInt($(this).data('index')), 1);
+      
+      afficher_liste_personnes();
+    });
+    
+    formulaire.on('submit', function(e) {
+      e.preventDefault();
+    
+      if (input_nom.val() == '') { // Pas de nom ?
+        alert('Il manque le nom.');
+        return false;
+      }
+      
+      // Ici : requête AJAX pour créer dans la BDD
+  
+      personnes.push({
+        id: Math.floor(Math.random() * (100 - 60 +1)) + 60, // Normalement, provient de la base
+        nom: input_nom.val()
+      });
+      
+      input_nom.val('');
+      
+      afficher_liste_personnes();
+    });
+    
+    afficher_liste_personnes();
+  });
+  </script>
+</body>
+</html>
