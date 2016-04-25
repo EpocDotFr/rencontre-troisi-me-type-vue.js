@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+  <div id="hey">
+    <h1>Personnes ({{ personnesFiltrees.length }})</h1>
+    <input type="text" placeholder="Filtrer" v-model="query">
+    <p v-show="personnesFiltrees.length == 0">Il n'y a personne à afficher :-(</p>
+    <button type="button" @click="tri = tri * -1"><template v-if="tri == 1">Trier Z-A</template><template v-if="tri == -1">Trier A-Z</template></button>
+    <ul>
+      <li v-for="personne in personnesFiltrees">{{ personne.nom }} <button @click="supprimerPersonne(personne)">Supprimer</button></li>
+    </ul>
+    
+    <form @submit.prevent="ajouterPersonne">
+      <h1>Nouvelle personne</h1>
+      <input type="text" placeholder="Entrez un nom" v-model="nom"><button type="submit">Ajouter</button>
+    </form>
+  </div>
+
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/vue/1.0.21/vue.min.js"></script>
+  <script>
+  var vue = new Vue({
+    el: '#hey',
+    data: {
+      nom: '',
+      query: '',
+      tri: 1,
+      personnes: []
+    },
+    ready: function() {
+      this.personnes = [ // Imaginons que ces données proviennent d'une requête AJAX
+        { nom: 'Amiral Ackbar', id: 56 },
+        { nom: 'Lando Calrissia', id: 42 },
+        { nom: 'Mace Windu', id: 10 },
+        { nom: 'Palpatine', id: 23 }
+      ];
+    },
+    computed: {
+      personnesFiltrees: function() {
+        return this.$options.filters.filterBy(this.personnesTriees, this.query, 'nom');
+      },
+      personnesTriees: function() {
+        return this.$options.filters.orderBy(this.personnes, 'nom', this.tri);
+      }
+    },
+    methods: {
+      ajouterPersonne: function() {
+        var nom = this.nom.trim();
+        
+        if (nom == '') {
+          alert('Il manque le nom.');
+          return false;
+        }
+  
+        // Ici : requête AJAX pour créer dans la BDD
+  
+        this.personnes.push({
+          id: Math.floor(Math.random() * (100 - 60 +1)) + 60, // Normalement, provient de la base
+          nom: nom
+        });
+        
+        this.nom = '';
+      },
+      supprimerPersonne: function(personne) {
+        // Ici normalement : requête AJAX pour supprimer dans la BDD en utilisant personne.id
+        this.personnes.$remove(personne);
+      }
+    }
+  });
+  </script>
+</body>
+</html>
